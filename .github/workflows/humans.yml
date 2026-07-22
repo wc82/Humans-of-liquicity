@@ -1,58 +1,98 @@
-- name: Create page
+name: Create Humans Story Page
 
-  run: |
+on:
+  issues:
+    types:
+      - opened
+      - edited
 
-    mkdir -p people
-
-    BODY='${{ github.event.issue.body }}'
-
-    NAME=$(echo "$BODY" | awk '/### Your Name/{getline; print}')
-    CITY=$(echo "$BODY" | awk '/### Your Home City/{getline; print}')
-    FESTIVAL=$(echo "$BODY" | awk '/### First Liquicity Festival Attended/{getline; print}')
-    TRACK=$(echo "$BODY" | awk '/### Track That Made You Love Drum .n. Bass/{getline; print}')
-    MESSAGE=$(echo "$BODY" | awk '/### Your Message To The World/{getline; print}')
-    IMAGE=$(echo "$BODY" | awk '/### Upload Image Link/{getline; print}')
-
-    SLUG=$(echo "$NAME" \
-    | tr '[:upper:]' '[:lower:]' \
-    | sed 's/ /-/g')
+permissions:
+  contents: write
 
 
-    cat <<EOF > people/$SLUG.html
+jobs:
+
+  create-page:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - uses: actions/checkout@v4
+
+
+    - name: Create page
+
+      run: |
+
+        mkdir -p people
+
+
+        BODY='${{ github.event.issue.body }}'
+
+
+        NAME=$(echo "$BODY" | awk '/### Your Name/{getline; print}')
+        CITY=$(echo "$BODY" | awk '/### Your Home City/{getline; print}')
+        FESTIVAL=$(echo "$BODY" | awk '/### First Liquicity Festival Attended/{getline; print}')
+        TRACK=$(echo "$BODY" | awk '/### Track That Made You Love Drum .n. Bass/{getline; print}')
+        MESSAGE=$(echo "$BODY" | awk '/### Your Message To The World/{getline; print}')
+        IMAGE=$(echo "$BODY" | awk '/### Upload Image Link/{getline; print}')
+
+
+        SLUG=$(echo "$NAME" \
+        | tr '[:upper:]' '[:lower:]' \
+        | sed 's/[^a-z0-9]/-/g' \
+        | sed 's/-\+/-/g' \
+        | sed 's/^-//' \
+        | sed 's/-$//')
+
+
+        cat <<EOF > people/$SLUG.html
 <!DOCTYPE html>
 <html>
 
 <head>
 
-<title>$NAME | Humans of Liquicity</title>
+<title>$NAME - Humans of Liquicity</title>
 
 <link rel="stylesheet" href="../assets/style.css">
 
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
 </head>
+
 
 <body>
 
 <div class="card">
 
-<img src="$IMAGE" style="width:100%;border-radius:20px;">
+
+<img src="$IMAGE" 
+style="width:100%;border-radius:20px;">
+
 
 <h1>$NAME</h1>
 
+
 <h3>📍 $CITY</h3>
+
 
 <p>
 <strong>First Liquicity Festival:</strong><br>
 $FESTIVAL
 </p>
 
+
 <p>
 <strong>Track that made you love Drum 'n' Bass:</strong><br>
 $TRACK
 </p>
 
+
 <blockquote>
 "$MESSAGE"
 </blockquote>
+
 
 </div>
 
@@ -60,3 +100,19 @@ $TRACK
 
 </html>
 EOF
+
+
+
+    - name: Commit page
+
+      run: |
+
+        git config user.name github-actions
+
+        git config user.email github-actions@github.com
+
+        git add .
+
+        git commit -m "New Humans of Liquicity story" || echo "No changes to commit"
+
+        git push
