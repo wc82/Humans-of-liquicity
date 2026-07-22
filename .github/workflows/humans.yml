@@ -9,6 +9,7 @@ on:
 permissions:
   contents: write
 
+
 jobs:
 
   create-page:
@@ -18,6 +19,7 @@ jobs:
     steps:
 
       - uses: actions/checkout@v5
+
 
       - name: Create person page
 
@@ -32,15 +34,13 @@ jobs:
 
           import os
           import re
-          import html
-
 
           body = os.environ["ISSUE_BODY"]
 
 
           def get_field(field):
               match = re.search(
-                  rf"### {field}\s*\n\s*(.*)",
+                  rf"### {re.escape(field)}\s*\n\s*(.*)",
                   body
               )
               return match.group(1).strip() if match else ""
@@ -72,15 +72,17 @@ jobs:
               "<head>",
               f"<title>{name} - Humans of Liquicity</title>",
               '<link rel="stylesheet" href="../../assets/style.css">',
+              '<meta name="viewport" content="width=device-width, initial-scale=1">',
               "</head>",
               "<body>",
-              '<div class="card">',
-              f'<img src="{image}" style="width:100%;border-radius:20px;">',
+              '<div class="profile">',
+              f'<img src="{image}" class="profile-image">',
               f"<h1>{name}</h1>",
               f"<h3>📍 {city}</h3>",
               f"<p><strong>First Liquicity Festival:</strong><br>{festival}</p>",
               f"<p><strong>Track that made you love Drum 'n' Bass:</strong><br>{track}</p>",
               f"<blockquote>{message}</blockquote>",
+              '<a href="../../">← Back to Humans of Liquicity</a>',
               "</div>",
               "</body>",
               "</html>"
@@ -90,8 +92,8 @@ jobs:
           with open(
               f"{folder}/index.html",
               "w"
-          ) as f:
-              f.write("\n".join(lines))
+          ) as file:
+              file.write("\n".join(lines))
 
 
           PY
@@ -105,25 +107,59 @@ jobs:
 
           import glob
           import os
+          import re
 
 
           cards = []
 
 
-          for folder in glob.glob("people/*/"):
+          for file in glob.glob("people/*/index.html"):
 
-              slug = os.path.basename(
-                  os.path.normpath(folder)
+              with open(file) as f:
+                  html = f.read()
+
+
+              folder = os.path.basename(
+                  os.path.dirname(file)
               )
 
-              name = slug.replace("-", " ").title()
+
+              name = re.search(
+                  r"<h1>(.*?)</h1>",
+                  html
+              )
+
+              image = re.search(
+                  r'<img src="(.*?)"',
+                  html
+              )
+
+              city = re.search(
+                  r"📍 (.*?)</h3>",
+                  html
+              )
+
+
+              name = name.group(1) if name else folder.title()
+              image = image.group(1) if image else ""
+              city = city.group(1) if city else ""
+
 
               cards.append(
-                  f'<a class="card" href="people/{slug}/"><h2>{name}</h2><p>Read their story →</p></a>'
+                  f"""
+                  <div class="human-card">
+                  <a href="people/{folder}/">
+                  <img src="{image}" class="human-image">
+                  <h2>{name}</h2>
+                  <p>📍 {city}</p>
+                  <p>Read their story →</p>
+                  </a>
+                  </div>
+                  """
               )
 
 
-          html = "\n".join([
+          page = [
               "<!DOCTYPE html>",
               "<html>",
               "<head>",
@@ -131,17 +167,20 @@ jobs:
               '<link rel="stylesheet" href="assets/style.css">',
               "</head>",
               "<body>",
+              "<header>",
               "<h1>🌌 Humans of Liquicity</h1>",
-              "<main>",
-              *cards,
-              "</main>",
+              "<p>The people who make the Liquicity family</p>",
+              "</header>",
+              '<section class="gallery">',
+              "".join(cards),
+              "</section>",
               "</body>",
               "</html>"
-          ])
+          ]
 
 
           with open("index.html","w") as f:
-              f.write(html)
+              f.write("\n".join(page))
 
 
           PY
