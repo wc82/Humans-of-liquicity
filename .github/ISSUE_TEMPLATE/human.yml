@@ -11,11 +11,9 @@ body:
     value: |
       ## 🌌 Humans of Liquicity
 
-      Share your Liquicity journey with the community.
+      Share your Liquicity story with the community.
 
       Tell us about your first festival, the track that made you love Drum 'n' Bass, and your message to the world.
-
-      📸 Add a photo by dragging it into the image field below.
 
 
 - type: input
@@ -68,7 +66,7 @@ body:
   id: image
   attributes:
     label: Upload Image Link
-    description: Drag and drop your image here
+    description: Drag and drop your image into this box
     placeholder: Drop your photo here
   validations:
     required: true
