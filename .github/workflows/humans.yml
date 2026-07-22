@@ -1,90 +1,76 @@
-name: Create Human Story
+- name: Create page
 
-on:
-  issues:
-    types:
-      - opened
+  run: |
 
-
-permissions:
-  contents: write
-  issues: write
+    mkdir -p people
 
 
-jobs:
-
- create-page:
-
-  runs-on: ubuntu-latest
+    BODY='${{ github.event.issue.body }}'
 
 
-  steps:
-
-  - uses: actions/checkout@v4
-
-
-  - name: Generate story page
-
-    run: |
-
-      mkdir -p people
+    NAME=$(echo "$BODY" | awk '/### Your Name/{getline; print}')
+    CITY=$(echo "$BODY" | awk '/### Your Home City/{getline; print}')
+    FESTIVAL=$(echo "$BODY" | awk '/### First Liquicity Festival Attended/{getline; print}')
+    TRACK=$(echo "$BODY" | awk '/### Track That Made You Love Drum .n. Bass/{getline; print}')
+    MESSAGE=$(echo "$BODY" | awk '/### Your Message To The World/{getline; print}')
+    IMAGE=$(echo "$BODY" | awk '/### Upload Image Link/{getline; print}')
 
 
-      NAME=$(echo "${{github.event.issue.title}}" | sed 's/Human: //')
-
-      FILE=$(echo $NAME | tr ' ' '-' | tr '[:upper:]' '[:lower:]')
-
-
-      cat > people/$FILE.html <<EOF
-
-      <!DOCTYPE html>
-
-      <html>
-
-      <head>
-
-      <title>$NAME - Humans of Liquicity</title>
-
-      <link rel="stylesheet" href="../assets/style.css">
-
-      </head>
+    SLUG=$(echo "$NAME" \
+    | tr '[:upper:]' '[:lower:]' \
+    | sed 's/ /-/g')
 
 
-      <body>
+    cat <<EOF > people/$SLUG.html
+
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>$NAME | Humans of Liquicity</title>
+
+<link rel="stylesheet" href="../assets/style.css">
+
+</head>
 
 
-      <div class="card">
+<body>
 
-      <h1>$NAME</h1>
-
-
-      <pre>
-
-      ${{github.event.issue.body}}
-
-      </pre>
+<div class="card">
 
 
-      </div>
+<img src="$IMAGE"
+style="width:100%;border-radius:20px;">
 
 
-      </body>
-
-      </html>
-
-      EOF
+<h1>$NAME</h1>
 
 
-  - name: Commit
+<h3>📍 $CITY</h3>
 
-    run: |
 
-      git config user.name github-actions
+<p>
+<strong>First Liquicity Festival:</strong><br>
+$FESTIVAL
+</p>
 
-      git config user.email github-actions@github.com
 
-      git add .
+<p>
+<strong>Track that made you love Drum 'n' Bass:</strong><br>
+$TRACK
+</p>
 
-      git commit -m "New Humans of Liquicity story"
 
-      git push
+<blockquote>
+"$MESSAGE"
+</blockquote>
+
+
+</div>
+
+</body>
+
+</html>
+
+EOF
