@@ -1,34 +1,74 @@
 name: Humans of Liquicity Story
+
 description: Submit your Liquicity story
+
 title: "Human: "
+
 body:
+
+- type: markdown
+  attributes:
+    value: |
+      ## 🌌 Humans of Liquicity
+
+      Share your Liquicity journey with the community.
+
+      Tell us about your first festival, the track that made you love Drum 'n' Bass, and your message to the world.
+
+      📸 Add a photo by dragging it into the image field below.
+
 
 - type: input
   id: name
   attributes:
     label: Your Name
+    description: The name you want displayed on your story page
+    placeholder: Your name
+  validations:
+    required: true
+
 
 - type: input
   id: city
   attributes:
     label: Your Home City
+    placeholder: London
+  validations:
+    required: true
+
 
 - type: input
   id: festival
   attributes:
     label: First Liquicity Festival Attended
+    placeholder: Liquicity Festival 2023
+  validations:
+    required: true
+
 
 - type: input
   id: track
   attributes:
     label: Track That Made You Love Drum 'n' Bass
+    placeholder: Artist - Track Name
+  validations:
+    required: true
+
 
 - type: textarea
   id: message
   attributes:
     label: Your Message To The World
+    placeholder: Your message to the Liquicity family...
+  validations:
+    required: true
+
 
 - type: textarea
   id: image
   attributes:
     label: Upload Image Link
+    description: Drag and drop your image here
+    placeholder: Drop your photo here
+  validations:
+    required: true
