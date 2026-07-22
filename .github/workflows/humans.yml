@@ -51,13 +51,11 @@ jobs:
               return match.group(1).strip() if match else ""
 
 
-
           name = get_field("Your Name") or "Anonymous"
 
           city = get_field("Your Home City")
 
           image_text = get_field("Upload Image Link")
-
 
 
           image = ""
@@ -71,7 +69,6 @@ jobs:
               image = image_match.group(0)
 
 
-
           slug = re.sub(
               r"[^a-z0-9]+",
               "-",
@@ -79,8 +76,8 @@ jobs:
           ).strip("-")
 
 
-
           folder = f"people/{slug}"
+
 
           counter = 2
 
@@ -91,9 +88,7 @@ jobs:
               counter += 1
 
 
-
           os.makedirs(folder, exist_ok=True)
-
 
 
           reserved = [
@@ -103,7 +98,6 @@ jobs:
           ]
 
 
-
           sections = re.findall(
               r"### (.*?)\n\n(.*?)(?=\n###|$)",
               body,
@@ -111,96 +105,93 @@ jobs:
           )
 
 
-
           story = []
 
 
           for question, answer in sections:
 
-              if question in reserved:
+              if question.strip() in reserved:
                   continue
-
-
-              question = html.escape(question.strip())
-
-              answer = html.escape(answer.strip())
 
 
               story.append(
                   f"""
-                  <div class="answer">
+<div class="answer">
 
-                  <h3>{question}</h3>
+<h3>{html.escape(question.strip())}</h3>
 
-                  <p>{answer}</p>
+<p>{html.escape(answer.strip())}</p>
 
-                  </div>
-                  """
+</div>
+"""
               )
 
 
+          page = []
 
-          page = [
-
-              "<!DOCTYPE html>",
-
-              "<html>",
-
-              "<head>",
-
-              f"<title>{html.escape(name)} - Humans of Liquicity</title>",
-
-              '<link rel="stylesheet" href="../../assets/style.css">',
-
-              '<meta name="viewport" content="width=device-width, initial-scale=1">',
-
-              "</head>",
-
-
-              "<body>",
+          page.append("<!DOCTYPE html>")
+          page.append("<html>")
+          page.append("<head>")
+          page.append(
+              f"<title>{html.escape(name)} - Humans of Liquicity</title>"
+          )
+          page.append(
+              '<link rel="stylesheet" href="../../assets/style.css">'
+          )
+          page.append(
+              '<meta name="viewport" content="width=device-width, initial-scale=1">'
+          )
+          page.append("</head>")
+          page.append("<body>")
 
 
-              '<div class="profile">',
+          page.append('<div class="profile">')
 
 
-              f'<img src="{image}" class="profile-image">',
+          if image:
+
+              page.append(
+                  f'<img src="{image}" class="profile-image">'
+              )
 
 
-              f"<h1>{html.escape(name)}</h1>",
+          page.append(
+              f"<h1>{html.escape(name)}</h1>"
+          )
 
 
-              f"<h3>📍 {html.escape(city)}</h3>",
+          page.append(
+              f"<h3>📍 {html.escape(city)}</h3>"
+          )
 
 
-              "".join(story),
+          page.append(
+              "\n".join(story)
+          )
 
 
-              '<a href="../../">← Back to Humans of Liquicity</a>',
+          page.append(
+              '<a href="../../">← Back to Humans of Liquicity</a>'
+          )
 
 
-              "</div>",
-
-
-              "</body>",
-
-
-              "</html>"
-
-          ]
-
+          page.append("</div>")
+          page.append("</body>")
+          page.append("</html>")
 
 
           with open(
               f"{folder}/index.html",
-              "w"
+              "w",
+              encoding="utf-8"
           ) as file:
 
-              file.write("\n".join(page))
+              file.write(
+                  "\n".join(page)
+              )
 
 
           PY
-
-
 
 
 
@@ -221,7 +212,12 @@ jobs:
 
           for file in glob.glob("people/*/index.html"):
 
-              with open(file, encoding="utf-8") as f:
+
+              with open(
+                  file,
+                  encoding="utf-8"
+              ) as f:
+
                   page = f.read()
 
 
@@ -248,74 +244,78 @@ jobs:
               )
 
 
-              name = html.escape(
+              name = (
                   name_match.group(1)
-                  if name_match else folder.title()
+                  if name_match
+                  else folder.title()
               )
 
 
               image = (
                   image_match.group(1)
-                  if image_match else ""
+                  if image_match
+                  else ""
               )
 
 
-              city = html.escape(
+              city = (
                   city_match.group(1)
-                  if city_match else ""
+                  if city_match
+                  else ""
               )
-
 
 
               cards.append(
-                  f"""
-                  <article class="human-card">
-
-                      <a href="people/{folder}/">
-
-                          <img 
-                          src="{image}" 
-                          class="human-image"
-                          loading="lazy">
-
-                          <div class="card-content">
-
-                              <h2>{name}</h2>
-
-                              <p>📍 {city}</p>
-
-                              <span>
-                              Read their story →
-                              </span>
-
-                          </div>
-
-                      </a>
-
-                  </article>
                   """
+<article class="human-card">
+
+<a href="people/{folder}/">
+
+<img src="{image}" class="human-image" loading="lazy">
+
+<div class="card-content">
+
+<h2>{name}</h2>
+
+<p>📍 {city}</p>
+
+<span>Read their story →</span>
+
+</div>
+
+</a>
+
+</article>
+""".format(
+                      folder=folder,
+                      image=image,
+                      name=html.escape(name),
+                      city=html.escape(city)
+                  )
               )
 
 
-
-          page = f"""
-<!DOCTYPE html>
-<html>
-
-<head>
-
-<title>Humans of Liquicity</title>
-
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<link rel="stylesheet" href="assets/style.css">
-
-</head>
+          output = []
 
 
-<body>
+          output.append("<!DOCTYPE html>")
+          output.append("<html>")
+          output.append("<head>")
+          output.append("<title>Humans of Liquicity</title>")
+          output.append(
+              '<meta name="viewport" content="width=device-width, initial-scale=1">'
+          )
+          output.append(
+              '<link rel="stylesheet" href="assets/style.css">'
+          )
+          output.append("</head>")
 
 
+          output.append("<body>")
+
+
+          output.append(
+              """
 <header class="hero">
 
 <h1>🌌 Humans of Liquicity</h1>
@@ -325,20 +325,27 @@ The people, stories and memories behind the Liquicity family
 </p>
 
 </header>
-
-
-
-<main class="gallery">
-
-{"".join(cards)}
-
-</main>
-
-
-</body>
-
-</html>
 """
+          )
+
+
+          output.append(
+              '<main class="gallery">'
+          )
+
+
+          output.append(
+              "\n".join(cards)
+          )
+
+
+          output.append(
+              "</main>"
+          )
+
+
+          output.append("</body>")
+          output.append("</html>")
 
 
           with open(
@@ -347,11 +354,12 @@ The people, stories and memories behind the Liquicity family
               encoding="utf-8"
           ) as f:
 
-              f.write(page)
+              f.write(
+                  "\n".join(output)
+              )
 
 
           PY
-
 
 
 
