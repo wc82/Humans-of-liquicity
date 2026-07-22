@@ -38,6 +38,18 @@ if body:
     image = ""
 
 
+    def extract_url(match):
+
+        if not match:
+            return ""
+
+        if match.lastindex:
+            return match.group(1)
+
+        return match.group(0)
+
+
+
     # Look in image field first
 
     image_match = re.search(
@@ -45,40 +57,46 @@ if body:
         image_text
     )
 
+    image = extract_url(image_match)
+
+
 
     # Look anywhere in issue body
 
-    if not image_match:
+    if not image:
 
         image_match = re.search(
             r"https?://github\.com/user-attachments/[^\s\)\"<>]+",
             body
         )
 
+        image = extract_url(image_match)
+
+
 
     # Look for markdown image format
 
-    if not image_match:
+    if not image:
 
         image_match = re.search(
             r"\((https?://[^)]+)\)",
             body
         )
 
+        image = extract_url(image_match)
+
+
 
     # Look for HTML image format
 
-    if not image_match:
+    if not image:
 
         image_match = re.search(
             r'src="([^"]+)"',
             body
         )
 
-
-    if image_match:
-
-        image = image_match.group(1)
+        image = extract_url(image_match)
 
 
 
@@ -96,6 +114,7 @@ if body:
         folder,
         exist_ok=True
     )
+
 
 
     sections = re.findall(
@@ -131,41 +150,38 @@ if body:
 
 
 
-    person = []
+    person = [
 
-    person.append("<!DOCTYPE html>")
-    person.append("<html>")
-    person.append("<head>")
+        "<!DOCTYPE html>",
+        "<html>",
+        "<head>",
 
-    person.append(
         "<title>"
         + html.escape(name)
-        + " - Humans of Liquicity</title>"
-    )
+        + " - Humans of Liquicity</title>",
 
-    person.append(
-        "<link rel='stylesheet' href='../../assets/style.css'>"
-    )
+        "<link rel='stylesheet' href='../../assets/style.css'>",
 
-    person.append(
-        "<meta name='viewport' content='width=device-width, initial-scale=1'>"
-    )
+        "<meta name='viewport' content='width=device-width, initial-scale=1'>",
 
-    person.append("</head>")
-    person.append("<body>")
+        "</head>",
 
-    person.append(
+        "<body>",
+
         "<div class='profile'>"
-    )
+
+    ]
+
 
 
     if image:
 
         person.append(
             "<img class='profile-image' src='"
-            + image
+            + html.escape(image)
             + "'>"
         )
+
 
 
     person.append(
@@ -187,21 +203,13 @@ if body:
     )
 
 
-    person.append(
-        "<a href='../../'>← Back to Humans of Liquicity</a>"
-    )
-
-
-    person.append(
-        "</div>"
-    )
-
-    person.append(
-        "</body>"
-    )
-
-    person.append(
-        "</html>"
+    person.extend(
+        [
+            "<a href='../../'>← Back to Humans of Liquicity</a>",
+            "</div>",
+            "</body>",
+            "</html>"
+        ]
     )
 
 
@@ -307,53 +315,32 @@ for file in glob.glob(
 
 
 
-homepage = []
+homepage = [
 
-homepage.append("<!DOCTYPE html>")
-homepage.append("<html>")
-homepage.append("<head>")
+    "<!DOCTYPE html>",
+    "<html>",
+    "<head>",
+    "<title>Humans of Liquicity</title>",
+    "<meta name='viewport' content='width=device-width, initial-scale=1'>",
+    "<link rel='stylesheet' href='assets/style.css'>",
+    "</head>",
+    "<body>",
 
-homepage.append(
-    "<title>Humans of Liquicity</title>"
-)
+    "<header class='hero'>",
+    "<h1>🌌 Humans of Liquicity</h1>",
+    "<p>The people, stories and memories behind the Liquicity family</p>",
+    "</header>",
 
-homepage.append(
-    "<meta name='viewport' content='width=device-width, initial-scale=1'>"
-)
+    "<main class='gallery'>",
 
-homepage.append(
-    "<link rel='stylesheet' href='assets/style.css'>"
-)
+    "".join(cards),
 
-homepage.append("</head>")
-homepage.append("<body>")
+    "</main>",
 
+    "</body>",
+    "</html>"
 
-homepage.append(
-    "<header class='hero'>"
-    "<h1>🌌 Humans of Liquicity</h1>"
-    "<p>The people, stories and memories behind the Liquicity family</p>"
-    "</header>"
-)
-
-
-homepage.append(
-    "<main class='gallery'>"
-)
-
-
-homepage.extend(
-    cards
-)
-
-
-homepage.append(
-    "</main>"
-)
-
-
-homepage.append("</body>")
-homepage.append("</html>")
+]
 
 
 
