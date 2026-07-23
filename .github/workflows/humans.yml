@@ -6,10 +6,12 @@ on:
       - opened
       - edited
 
-    workflow_dispatch:
+  workflow_dispatch:
+
 
 permissions:
   contents: write
+
 
 jobs:
 
@@ -17,18 +19,26 @@ jobs:
 
     runs-on: ubuntu-latest
 
+
     steps:
 
-      - uses: actions/checkout@v5
+
+      - name: Checkout repository
+
+        uses: actions/checkout@v5
+
 
 
       - name: Generate Humans pages
 
         env:
-  ISSUE_BODY: ${{ github.event.issue.body || '' }}
+
+          ISSUE_BODY: ${{ github.event.issue.body || '' }}
+
         run: |
 
           python3 scripts/generate_humans.py
+
 
 
       - name: Commit pages
